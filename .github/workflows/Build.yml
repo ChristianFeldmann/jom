@@ -1,0 +1,31 @@
+name: CI build
+
+on:
+  push:
+  release:
+    types:
+      - created
+
+jobs:
+  build-jom:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
+    - name: Install Qt
+      run: |
+        choco install qt-sdk
+    - name: Build Windows
+      run: |
+        mkdir build
+        cd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        qmake CONFIG+=UNITTESTS ..
+        nmake
+        cd ..
+      shell: cmd
+    
+  # How to upload files to the release:
+  # https://github.com/Blacksmoke16/oq/pull/47/files#diff-082c28d748ad2e3eecc5508d740d9417R9-R29
+  # Mime type list
+  # https://www.iana.org/assignments/media-types/media-types.xhtml
