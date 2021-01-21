@@ -1,0 +1,47 @@
+name: CI build
+
+on:
+  push:
+  release:
+    types:
+      - created
+
+jobs:
+  build-jom:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
+    - name: Install Qt base
+      run: |
+        cd ../../
+        mkdir -p YUViewQt/YUViewQt
+        cd YUViewQt/YUViewQt
+        curl -L https://github.com/ChristianFeldmann/YUViewQt/releases/download/QtBase-5.15.1/qtBase_5.15.1_win.zip -o Qt.zip
+        7z x  Qt.zip
+        echo "$GITHUB_WORKSPACE/../../YUViewQt/YUViewQt/Qt/bin" >> $GITHUB_PATH
+      shell: bash
+    - name: Build Windows
+      run: |
+        mkdir build
+        cd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        d:\a\YUViewQt\YUViewQt\Qt\bin\qmake ..
+        nmake release
+        cd ..
+      shell: cmd
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: jom.exe
+        path: ./build/bin/jom.exe
+    - name: Upload Windows zip to Release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./build/bin/jom.exe
+        asset_name: jom.exe
+        asset_content_type: application/octet-stream
+      if: github.event_name == 'release'
