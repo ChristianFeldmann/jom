@@ -26,7 +26,7 @@ jobs:
         mkdir build
         cd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        qmake CONFIG+=UNITTESTS ..
+        d:\a\YUViewQt\YUViewQt\Qt\bin\qmake ..
         nmake
         cd ..
       shell: cmd
